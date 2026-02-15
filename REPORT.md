@@ -76,39 +76,43 @@ The code is modular — if we wanted to swap in a different model or a fine-tune
 
 ## Screenshots
 
-*Add screenshots here showing the app in action.*
 
 ### Main Interface
 
-**[Screenshot 1]**  
+![Main Interface](screenshots/1.png)
+
 The home screen with source text area, reference section, and model selector in the sidebar.
 
 ---
 
 ### After Translation
 
-**[Screenshot 2]**  
+![After Translation](screenshots/2.png)  
 NMT output displayed after clicking Translate.
 
 ---
 
 ### BLEU Results
 
-**[Screenshot 3]**  
+![BLEU Results](screenshots/3.png)
 The evaluation section showing BLEU score, brevity penalty, and the n-gram precision table with all four rows (1-gram through 4-gram).
 
 ---
 
 ### Comparing Multiple Candidates
 
-**[Screenshot 4]**  
+![Add Another Candidate](screenshots/4.png)
+
+![Comparing Multiple Candidates](screenshots/5.png)
+
 Two or more candidates with their individual BLEU scores, showing how different translations compare.
 
 ---
 
 ### File Upload
 
-**[Screenshot 5]**  
+![File Upload](screenshots/6.png)
+
 Using "Upload file" to provide the reference translation instead of pasting.
 
 ---
