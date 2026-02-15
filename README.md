@@ -1,118 +1,113 @@
-# NMT System with Automatic BLEU Evaluation
+# NMT System with BLEU Evaluation
 
-Medical/healthcare-oriented Neural Machine Translation (NMT) application with BLEU-based quality evaluation.
-
----
-
-## Deliverables Checklist
-
-### Part 1: Task A & B (10 Marks)
-
-| Deliverable | Status | Location |
-|-------------|--------|----------|
-| Well-documented code (Python, NMT libraries, frontend) | ✅ | `app.py`, `nmt_service.py`, `bleu_utils.py`, `DOCUMENTATION.md` |
-| Instructions for running the application locally | ✅ | This README, section **“How to run locally”** |
-| Brief report (design choices, challenges, NMT integration) | ✅ | `REPORT.md` |
-| Screenshots explaining full flow with results | Placeholders in report | `REPORT.md` §4 — add your screenshots there |
-| Task B (Quality Improvement Strategy) as PDF | Content ready | Export `Quality_Improvement_Strategy.md` to PDF (see below) |
-
-### Part 2: Literature Survey (5 Marks)
-
-| Deliverable | Status | Location |
-|-------------|--------|----------|
-| Literature Survey: Automatic Evaluation Metrics for NMT | ✅ | `Literature_Survey.md` — export to PDF |
+A web app for neural machine translation with automatic quality evaluation. Built for medical/healthcare text, but works with any content.
 
 ---
 
-## How to Run the Application Locally
+## What This Project Does
 
-### Prerequisites
-
-- **Python:** 3.8 or 3.9+ recommended.
-- **OS:** Windows, macOS, or Linux.
-- **Network:** Required for first run (downloads MarianMT model from Hugging Face).
-- **Disk:** ~500 MB free for model cache.
-
-### Steps
-
-1. **Clone or copy the project** and open a terminal in the project folder:
-   ```bash
-   cd /path/to/nlpa2
-   ```
-
-2. **Create and activate a virtual environment** (recommended):
-   ```bash
-   python -m venv .venv
-   source .venv/bin/activate    # On Windows: .venv\Scripts\activate
-   ```
-
-3. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Run the application:**
-   ```bash
-   streamlit run app.py
-   ```
-
-5. **Open in browser:**  
-   The terminal will show a URL (e.g. `http://localhost:8501`). Open it in your browser.
-
-6. **Use the app:**
-   - Enter or paste **source text** (e.g. medical sentence in English).
-   - Choose **reference**: paste translation(s) or upload a `.txt` file (one reference per line).
-   - Click **Translate** to get NMT output.
-   - View **BLEU score**, **brevity penalty**, and **n-gram precision table** (1–4 grams).
-   - Optionally add **extra candidates** (one per line) to compare multiple translations.
-   - **Sample inputs:** see **`SAMPLE_EXAMPLES.md`** for copy-paste source and reference examples.
-
-### Troubleshooting
-
-- **“No module named 'streamlit'”** → Run `pip install -r requirements.txt` inside the same venv.
-- **First translation is slow** → Model is downloaded on first use; later runs reuse the cached model.
-- **Out of memory** → Use a smaller beam size in the sidebar or shorten the source text.
-- **PermissionError on Hugging Face cache** (e.g. when switching to opus-mt-en-es) → The app now uses a **project-local cache** (`.cache/huggingface/` inside the project). Restart the app and try again; models will download into the project folder. If you still see permission errors, remove any stale lock: `rm -rf ~/.cache/huggingface/hub/.locks/models--Helsinki-NLP--opus-mt-en-es` (and the same for other model names if needed).
+- Translates text using MarianMT (Transformer-based models from Helsinki-NLP)
+- Computes BLEU score to measure translation quality
+- Shows a detailed breakdown: n-gram precision (1-gram through 4-gram), brevity penalty, match counts
+- Lets you compare multiple translations side by side
 
 ---
 
-## Task B: Submit as PDF
+## Quick Start
 
-Task B is written in **`Quality_Improvement_Strategy.md`**. To submit it as a **.pdf document**:
+**You'll need:** Python 3.8+, about 500MB disk space, internet connection (first run downloads the model)
 
-1. **Option A — Pandoc (command line):**
-   ```bash
-   pandoc Quality_Improvement_Strategy.md -o Quality_Improvement_Strategy.pdf
-   ```
+```bash
+# 1. Go to the project folder
+cd /path/to/nlpa2
 
-2. **Option B — VS Code / Cursor:**  
-   Install a “Markdown PDF” or “Print” extension, open `Quality_Improvement_Strategy.md`, then export or print to PDF.
+# 2. Set up a virtual environment (recommended)
+python -m venv .venv
+source .venv/bin/activate    # Windows: .venv\Scripts\activate
 
-3. **Option C — Browser:**  
-   Open the `.md` file in a Markdown preview or a site that renders Markdown, then use the browser’s Print → Save as PDF.
+# 3. Install dependencies
+pip install -r requirements.txt
 
-Submit the generated **`Quality_Improvement_Strategy.pdf`** (or the same content in a single PDF with your report) as required.
+# 4. Run the app
+streamlit run app.py
+```
 
----
-
-## Project Layout
-
-| File | Description |
-|------|-------------|
-| `app.py` | Streamlit frontend: source input, reference (paste/upload), NMT output, BLEU results |
-| `nmt_service.py` | NMT translation using MarianMT (Helsinki-NLP) via Hugging Face |
-| `bleu_utils.py` | BLEU computation: modified n-gram precision, brevity penalty, n-gram table |
-| `requirements.txt` | Python dependencies (Streamlit, transformers, torch, etc.) |
-| `README.md` | This file — run instructions and deliverables |
-| `DOCUMENTATION.md` | Code and architecture documentation |
-| `REPORT.md` | Design report: design choices, challenges, NMT integration, screenshot placeholders |
-| `Quality_Improvement_Strategy.md` | Task B content — export to PDF for submission |
-| `Literature_Survey.md` | Part 2: Literature survey (5 marks) — export to PDF |
+Open the URL shown in terminal (usually http://localhost:8501).
 
 ---
 
-## Task A Summary
+## How to Use
 
-- **UI:** Source text input; reference by paste or file upload; display of NMT output, BLEU score, brevity penalty, and n-gram precision table (1–4).
-- **Translation:** MarianMT (Helsinki-NLP) Transformer models; optional beam size.
-- **Evaluation:** Custom BLEU with modified n-gram precision and brevity penalty; support for multiple references and multiple candidates.
+1. **Enter source text** — Type or paste the text you want to translate (e.g., a medical sentence in English)
+2. **Add a reference** — Paste a human translation, or upload a .txt file. This is what BLEU compares against.
+3. **Click Translate** — The NMT model translates your text
+4. **See the results** — BLEU score, brevity penalty, and a table showing how many n-grams matched
+
+Want to compare multiple translations? Paste them in the "Add more candidates" box (one per line).
+
+Check `SAMPLE_EXAMPLES.md` for ready-to-use medical text examples.
+
+---
+
+## If Something Goes Wrong
+
+- **"No module named streamlit"** — Make sure you activated the venv and ran `pip install -r requirements.txt`
+- **Translation takes forever** — First run downloads the model (~300MB). After that it's cached.
+- **Out of memory** — Try a smaller beam size (sidebar slider) or shorter text
+- **Permission error with Hugging Face** — The app uses a local cache folder. Just restart and try again.
+
+---
+
+## Project Files
+
+| File | What it does |
+|------|--------------|
+| `app.py` | The web interface (Streamlit) |
+| `nmt_service.py` | Handles translation using MarianMT |
+| `bleu_utils.py` | BLEU score calculation with n-gram precision and brevity penalty |
+| `requirements.txt` | Python packages needed |
+| `REPORT.md` | Design report for submission |
+| `Quality_Improvement_Strategy.md` | Task B write-up |
+| `Literature_Survey.md` | Part 2 literature review |
+| `SAMPLE_EXAMPLES.md` | Example inputs to try |
+
+---
+
+## How the Code Works
+
+### Translation (`nmt_service.py`)
+
+Uses Hugging Face's `transformers` library to load MarianMT models. These are Transformer encoder-decoder models trained on millions of sentence pairs. The app supports multiple language pairs (en-de, en-es, en-fr, de-en) — just pick one from the sidebar.
+
+Key function: `translate(text, model_name, num_beams)` — takes source text, returns translated text.
+
+### BLEU Computation (`bleu_utils.py`)
+
+Implements the standard BLEU formula from scratch:
+- **Modified n-gram precision**: counts matching n-grams but clips by the max count in any reference (so repeating words doesn't game the score)
+- **Brevity penalty**: penalizes translations that are too short
+- **Final score**: geometric mean of 1-4 gram precisions × brevity penalty
+
+Why not use sacrebleu or nltk? Because the assignment asks for the n-gram table with clipped counts, and building it ourselves makes that easy to display.
+
+### Web UI (`app.py`)
+
+Streamlit app with:
+- Text area for source input
+- Reference input (paste or file upload)
+- Model selection and beam size in sidebar
+- Results section showing BLEU, BP, and the n-gram precision table for each candidate
+
+---
+
+## Exporting to PDF
+
+Task B and the literature survey need to be submitted as PDFs:
+
+```bash
+# Using pandoc
+pandoc Quality_Improvement_Strategy.md -o Quality_Improvement_Strategy.pdf
+pandoc Literature_Survey.md -o Literature_Survey.pdf
+```
+
+Or use VS Code's "Markdown PDF" extension, or just open in a browser and print to PDF.

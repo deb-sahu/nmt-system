@@ -1,124 +1,114 @@
-# NMT Application — Design Report
+# Design Report
 
-**Project:** Neural Machine Translation with Automatic BLEU Evaluation  
-**Domain:** Medical/Healthcare-oriented  
-**Deliverable:** Part 1 — Brief report (design choices, challenges, NMT integration)
-
----
-
-## 1. Design Choices
-
-### 1.1 Frontend: Streamlit
-
-- **Choice:** Streamlit for the web UI instead of Flask/FastAPI + HTML/JS or a separate frontend.
-- **Reason:** Streamlit provides a single Python codebase, quick iteration, built-in file upload and text areas, and no separate frontend build. It fits the scope of an NMT demo with input → translate → BLEU output.
-- **Trade-off:** Less control over exact layout and styling than a custom frontend; acceptable for a coursework/demo application.
-
-### 1.2 NMT: MarianMT (Helsinki-NLP) via Hugging Face
-
-- **Choice:** Transformer-based NMT using MarianMT models (`opus-mt-*`) from Hugging Face `transformers`.
-- **Reason:** MarianMT offers many language pairs, is well-supported in `transformers`, runs on CPU or GPU, and is suitable for extension (e.g. fine-tuning for medical domain). No custom training code required for the baseline.
-- **Alternatives considered:** Generic seq2seq or custom Transformer would require training; using MarianMT keeps the deliverable focused on integration and evaluation.
-
-### 1.3 BLEU: Custom Implementation
-
-- **Choice:** Custom BLEU in `bleu_utils.py` (modified n-gram precision, brevity penalty, 1–4 gram table) instead of only using `nltk.translate.bleu_score` or `sacrebleu`.
-- **Reason:** The assignment asks for BLEU with **brevity penalty** and **n-gram precision table** (1-gram, 2-gram, etc.). A custom implementation makes these components explicit and gives full control over the displayed table (clipped matches, totals per n).
-- **Standard alignment:** Formula follows the standard BLEU definition (geometric mean of precisions × BP) so results are interpretable and comparable.
-
-### 1.4 Reference and Candidate Input
-
-- **Choice:** Reference via either paste (multi-line = multiple references) or file upload; candidates = NMT output + optional extra lines (multiple candidates).
-- **Reason:** Supports single/multiple references and comparison of NMT vs other candidates (e.g. another system or manual translation) as required by the assignment.
+**Project:** Neural Machine Translation with BLEU Evaluation  
+**Focus:** Medical/Healthcare text
 
 ---
 
-## 2. Challenges Faced
+## Team Members
 
-### 2.1 Model Download and Resource Use
+| Name | Roll Number |
+|------|-------------|
+| Arpan Ghosh | 2024AA05807 |
+| Deb Adarsh Sahu | 2024AA05072 |
+| Satyajit Panigrahi | 2024AA05089 |
+| Sridhar R | 2024AA05357 |
+| Sumangala B S | 2023AC05941 |
 
-- **Challenge:** First run downloads the chosen MarianMT model (hundreds of MB); inference on CPU can be slow for long texts.
-- **Mitigation:** Pipeline is cached per model so the same model is not re-downloaded; UI shows a “Running NMT…” spinner; user can choose a smaller beam for faster runs. For production, GPU would be recommended.
-
-### 2.2 Tokenization Consistency for BLEU
-
-- **Challenge:** BLEU is sensitive to tokenization. MarianMT uses subword tokenization; references are usually word-level.
-- **Mitigation:** BLEU is computed on **whitespace-tokenized** text (candidate and references) so that the evaluation is word-based and comparable to standard BLEU reporting. NMT output is used as plain text (no subword tokens exposed in the metric).
-
-### 2.3 Medical Domain
-
-- **Challenge:** Default MarianMT models are general-domain; medical terminology may be translated less accurately.
-- **Mitigation:** The app allows model selection and documents in Task B that **fine-tuning on domain-specific (medical) data** is the recommended way to improve quality and BLEU; the current app provides the pipeline and evaluation framework to plug in a fine-tuned model later.
+**Group:** 67
 
 ---
 
-## 3. How the NMT Model Was Integrated and Used
+## Why We Made These Choices
 
-### 3.1 Integration Stack
+### Streamlit for the UI
 
-- **Library:** Hugging Face `transformers`.
-- **API used:** `pipeline("translation", model=model_name)` with `model_name` e.g. `Helsinki-NLP/opus-mt-en-de`.
-- **Flow:** User selects model in UI → on “Translate”, `nmt_service.translate(source_text, model_name=..., num_beams=...)` is called → pipeline runs encoder–decoder inference → translated string is returned and displayed.
+We went with Streamlit instead of building a Flask app with separate HTML/CSS. It's all Python, which made development faster and kept the codebase simple. The built-in components (text areas, file upload, tables) were exactly what we needed. The trade-off is less control over styling, but for a demo app that's fine.
 
-### 3.2 Usage in the Application
+### MarianMT for Translation
 
-1. **Configuration:** Model choice and beam size are set in the Streamlit sidebar.
-2. **Translation:** When the user clicks “Translate”, the app calls `translate()` with the current source text and options; the result is stored and shown in the “NMT output” area.
-3. **Evaluation:** The same output (and any extra candidates) is passed to `bleu_utils.compute_bleu()` after tokenization; BLEU score, brevity penalty, and n-gram table are shown per candidate.
-4. **Multiple candidates:** Additional candidates can be pasted (one per line); each is evaluated against the same reference(s) so the user can compare BLEU and n-gram precisions across systems.
+We used Helsinki-NLP's MarianMT models through Hugging Face. These are proper Transformer models (6-layer encoder-decoder), pretrained on huge parallel corpora. They work out of the box — no training needed on our end. We picked models for common language pairs (en-de, en-es, en-fr) that would be relevant for medical translation scenarios.
 
-### 3.3 Extensibility
+Could we have trained our own model? Sure, but that would take days of GPU time and a lot of parallel medical data. Using pretrained models let us focus on the integration and evaluation parts.
 
-- **New models:** Any Hugging Face translation model compatible with `pipeline("translation", ...)` can be added to the sidebar list and used without changing the rest of the code.
-- **Fine-tuned model:** A fine-tuned MarianMT (e.g. on medical data) can be loaded by using its Hugging Face model id or local path as `model_name`.
+### Custom BLEU Implementation
 
----
+The assignment specifically asks for:
+- Modified n-gram precision
+- Brevity penalty
+- N-gram precision table (1-gram, 2-gram, etc.)
 
-## 4. Screenshots — Application Flow (with Results/Output)
-
-*Include the following screenshots in your final report (e.g. paste into this section or into a separate document that you submit).*
-
-### 4.1 Application home / input screen
-
-**[INSERT SCREENSHOT 1]**  
-*Caption: Main interface showing (1) Source text area with sample medical text, (2) Reference translation section (paste or upload), (3) Model selection in sidebar (e.g. Helsinki-NLP/opus-mt-en-de) and beam size.*
+We could have used sacrebleu or nltk, but they don't expose the intermediate values we needed for the table. So we wrote BLEU from scratch in `bleu_utils.py`. It follows the standard formula — geometric mean of clipped n-gram precisions times the brevity penalty.
 
 ---
 
-### 4.2 After clicking “Translate” — NMT output
+## Challenges We Ran Into
 
-**[INSERT SCREENSHOT 2]**  
-*Caption: Same screen after “Translate” was clicked. NMT output is visible in the “NMT output” text area. Reference is present so the BLEU section is active.*
+### Model Download Time
 
----
+The first time you pick a model, Hugging Face downloads it (~300MB). This makes the first translation slow. We added a spinner so users know something's happening, and the model gets cached for future runs.
 
-### 4.3 BLEU evaluation — score and n-gram table
+### Tokenization Mismatch
 
-**[INSERT SCREENSHOT 3]**  
-*Caption: BLEU evaluation section expanded for “NMT output”: BLEU score, brevity penalty, candidate/reference lengths, and the n-gram precision table (1-gram through 4-gram with Precision, Clipped matches, Total n-grams).*
+BLEU scores depend heavily on how you tokenize. MarianMT uses subword tokenization internally, but the output is normal text. We tokenize both the NMT output and the reference with simple whitespace splitting before computing BLEU. This keeps things consistent and matches how BLEU is typically reported.
 
----
+### Medical Domain
 
-### 4.4 Multiple candidates (optional)
-
-**[INSERT SCREENSHOT 4]**  
-*Caption: (Optional) Extra candidates added in the “Add more candidates” box; two or more expanders shown (e.g. “NMT output” and “Candidate 1”) with different BLEU scores and n-gram tables.*
+The pretrained models are general-purpose — they weren't trained specifically on medical text. Medical terminology might not translate as well as everyday language. We mention in Task B that fine-tuning on medical data would help, but we didn't implement that here since it's beyond the scope.
 
 ---
 
-### 4.5 Reference via file upload
+## How NMT is Integrated
 
-**[INSERT SCREENSHOT 5]**  
-*Caption: Reference translation provided via “Upload file” and a .txt file, with BLEU results displayed.*
+The flow is straightforward:
+
+1. User types source text and picks a model from the sidebar
+2. Clicks "Translate"
+3. `app.py` calls `nmt_service.translate()` with the text and model name
+4. `nmt_service` loads the Hugging Face pipeline (cached after first load) and runs inference
+5. Translated text comes back and gets displayed
+6. If there's a reference, `bleu_utils.compute_bleu()` calculates the score and n-gram table
+7. Everything shows up in the UI
+
+The code is modular — if we wanted to swap in a different model or a fine-tuned version, we'd just change the model name string.
 
 ---
 
-**Checklist for screenshots:**
+## Screenshots
 
-- [ ] Screenshot 1: Main UI with source text (and optionally reference)
-- [ ] Screenshot 2: NMT output visible after Translate
-- [ ] Screenshot 3: BLEU score + brevity penalty + n-gram table
-- [ ] Screenshot 4 (optional): Multiple candidates compared
-- [ ] Screenshot 5 (optional): File upload for reference
+*Add screenshots here showing the app in action.*
 
-Once you have taken these screenshots, paste them into this report (or into the PDF version) in the order above and add the captions. This documents the full flow and results of the application.
+### Main Interface
+
+**[Screenshot 1]**  
+The home screen with source text area, reference section, and model selector in the sidebar.
+
+---
+
+### After Translation
+
+**[Screenshot 2]**  
+NMT output displayed after clicking Translate.
+
+---
+
+### BLEU Results
+
+**[Screenshot 3]**  
+The evaluation section showing BLEU score, brevity penalty, and the n-gram precision table with all four rows (1-gram through 4-gram).
+
+---
+
+### Comparing Multiple Candidates
+
+**[Screenshot 4]**  
+Two or more candidates with their individual BLEU scores, showing how different translations compare.
+
+---
+
+### File Upload
+
+**[Screenshot 5]**  
+Using "Upload file" to provide the reference translation instead of pasting.
+
+---
