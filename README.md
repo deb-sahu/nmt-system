@@ -67,8 +67,6 @@ Check `SAMPLE_EXAMPLES.md` for ready-to-use medical text examples.
 | `bleu_utils.py` | BLEU score calculation with n-gram precision and brevity penalty |
 | `requirements.txt` | Python packages needed |
 | `REPORT.md` | Design report for submission |
-| `Quality_Improvement_Strategy.md` | Task B write-up |
-| `Literature_Survey.md` | Part 2 literature review |
 | `SAMPLE_EXAMPLES.md` | Example inputs to try |
 
 ---
