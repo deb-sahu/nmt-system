@@ -99,15 +99,3 @@ Streamlit app with:
 - Results section showing BLEU, BP, and the n-gram precision table for each candidate
 
 ---
-
-## Exporting to PDF
-
-Task B and the literature survey need to be submitted as PDFs:
-
-```bash
-# Using pandoc
-pandoc Quality_Improvement_Strategy.md -o Quality_Improvement_Strategy.pdf
-pandoc Literature_Survey.md -o Literature_Survey.pdf
-```
-
-Or use VS Code's "Markdown PDF" extension, or just open in a browser and print to PDF.
